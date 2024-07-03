@@ -1,0 +1,5 @@
+training:
+  max_epochs: 200
+  devices: [0]
+  lr: 0.08
+  weight_decay: 1e-4

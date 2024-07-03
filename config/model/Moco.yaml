@@ -1,0 +1,8 @@
+name: Moco
+intermediate_size: 512
+projection_size: 128
+moco_K: 4096
+moco_m: 0.99
+moco_T: 0.1
+moco_Symmetric: False
+moco_dim: 128

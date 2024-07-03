@@ -1,0 +1,3 @@
+transfer_learning: True
+transfer_dataset: Cifar10
+num_classes: 100

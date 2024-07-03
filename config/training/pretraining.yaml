@@ -1,0 +1,12 @@
+max_epochs: 200
+devices: [0]
+device: 0
+checkpoint_tosave: 10
+checkpoint_toload: 199
+steps: 49
+lr: 0.03
+weight_decay: 5e-4
+warmup_epochs: 10
+warmup_lr: 0
+base_lr: 0.03
+final_lr: 0

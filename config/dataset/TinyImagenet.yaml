@@ -1,0 +1,17 @@
+name: TinyImagenet
+data_dir: /home/gen/yash/OurData/data/tiny-imagenet-200/
+data_list: /home/gen/yash/OurData/data/tiny-imagenet-200/wnids.txt
+val_list: /home/gen/yash/OurData/data/tiny-imagenet-200/val/out.txt
+save_path: /home/gen/yash/work/Result_zip/LT-Results
+filepath: results/MeanWeights
+
+K: 1
+crop_max: 1
+image_size: 64
+batch_size: 256
+num_workers: 32
+num_classes: 200
+drop_last: False
+
+mean: [0.485,0.456,0.406]
+std: [0.229,0.224,0.225]

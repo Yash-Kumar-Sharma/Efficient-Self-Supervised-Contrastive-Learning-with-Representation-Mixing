@@ -1,0 +1,15 @@
+name: Cifar10
+data_dir: /home/gen/yash/OurData/data/
+save_path: /home/gen/yash/work/Result_zip/LT-Results
+#save_path: /home/gen/yash/work/Result_zip/Vision-SSL-Results/Ours/Pretrained_Model/cifar-10/resnet20/backbone200.tar
+filepath: results/MeanWeights
+K: 1
+knn_k: 200
+crop_max: 1
+image_size: 32
+batch_size: 1024
+num_workers: 32
+num_classes: 10
+drop_last: False
+mean: [0.491, 0.482, 0.447]
+std: [0.247, 0.243, 0.262]

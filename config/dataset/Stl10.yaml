@@ -1,0 +1,16 @@
+name: Stl10
+data_dir: /home/gen/yash/OurData/data/
+save_path: /home/gen/yash/work/Result_zip/LT-Results
+filepath: results/MeanWeights
+
+K: 1
+image_size: 96
+crop_max: 1
+batch_size: 256
+num_workers: 32
+num_classes: 10
+drop_last: False
+
+mean: [0.485,0.456,0.406]
+std: [0.485,0.456,0.406]
+

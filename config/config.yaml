@@ -1,0 +1,12 @@
+defaults:
+  - _self_
+  - dataset: Cifar100
+  - model: Simclr
+  - backbone: resnet32
+  - training: pretraining
+  - post_training: linear_evaluation
+  - imbalance: imbalance
+  - feature: feature
+  - transfer_learning: transfer
+    
+project_name: Feature Manipulations
