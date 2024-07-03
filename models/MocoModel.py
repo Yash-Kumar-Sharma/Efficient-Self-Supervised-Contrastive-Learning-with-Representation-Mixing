@@ -4,7 +4,7 @@ import torch
 import torchvision
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from Loss.loss import xent_loss
-from Utils.metric.similarity_mean import Positive_Negative_Mean
+from metric.similarity_mean import Positive_Negative_Mean
 #import config
 import torchmetrics
 import torch.nn.functional as F
@@ -17,6 +17,8 @@ import numpy as np
 import collections
 from copy import deepcopy
 import os
+from Pretraining.Knn_Monitor import Knn_Monitor
+import utils
 
 def stack(data, dim=0):
   shape = data[0].shape  # need to handle empty list
@@ -68,13 +70,12 @@ class MocoModel(pl.LightningModule):
         self.save_hyperparameters()
         #self.automatic_optimization = False
 
-        self.net = torchvision.models.resnet18(weights = None)
-        self.net.fc = nn.Identity()
+        self.net = utils.GetBackbone(config.backbone.name, config.dataset.name)
         #self.net.conv1 = nn.Conv2d(3, 64, 3, 1, 1, bias = False)
         #self.net.maxpool = nn.Identity()
         
         self.lr = config.training.lr
-        self.max_epochs = config.dataset.max_epochs
+        self.epochs = config.training.max_epochs
         self.batch_size = config.dataset.batch_size
         self.image_size = config.dataset.image_size
         self.filepath = config.dataset.filepath
@@ -120,6 +121,7 @@ class MocoModel(pl.LightningModule):
         self.conv_layer_configs = []
         self.loss_value = []
 
+        self.knn_monitor = Knn_Monitor(config)
      
     @torch.no_grad()
     def _momentum_update_key_encoder(self):
@@ -304,7 +306,7 @@ class MocoModel(pl.LightningModule):
         if(self.current_epoch % 10 == 0):
             save_path = os.path.join(self.save_path, self.model_name,
                                     "Pretrained_Model",self.dataset,
-                                    self.backbone,"pytorch_lightning")
+                                    self.backbone)
 
             if(not os.path.exists(save_path)):
                 os.makedirs(save_path)
@@ -314,7 +316,7 @@ class MocoModel(pl.LightningModule):
         configs = self.record_conv_configs(self.net)
         self.conv_layer_configs.append(configs)
 
-        if(self.current_epoch + 1 == self.max_epochs):
+        if(self.current_epoch + 1 == self.epochs):
             convfilename = os.path.join(self.filepath, ("file.pkl"))
             lossfilename = os.path.join(self.filepath, "loss.txt")
             
@@ -329,46 +331,27 @@ class MocoModel(pl.LightningModule):
             lossfile.close()
             file.close()
             print("Saved")
-            
-            #self.mean_weights_per_epoch.clear()
         
-    ''' 
-    def validation_step(self, batch, batch_idx): 
-        train_x, _ = batch
-        
-        #data = torch.stack(x,dim=1)
-        #data_transform = torch.stack(y,dim=1)
-        #d = data.size()
-
-        #train_x = data.view(d[0]*2*self.K, d[2],d[3],d[4])
-        #train_x_transform = data_transform.view(d[0]*2*self.K, d[2],d[3],d[4])
-        
-        embeddings = self.forward(train_x)
-        norm_embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
-        #embeddings_transform = self.forward(train_x_transform)
-        #norm_embeddings_transform = torch.nn.functional.normalize(embeddings_transform, p=2, dim=1)
-
-        #newEmbeddings = torch.add(norm_embeddings, norm_embeddings_transform)
-        #norm_embeddings = torch.nn.functional.normalize(newEmbeddings, p=2, dim=1)
-        loss = xent_loss(norm_embeddings)
+        top1 = self.knn_monitor.test(deepcopy(self.encoder_q.net.backbone))
 
         self.log_dict(
             {
-                'val_loss': loss,
-                'step': self.current_epoch,
+                'Knn Top-1': top1,
+                #'Knn Top-5': top5,
             },
-            on_step = False,
             on_epoch = True,
             prog_bar = True,
             sync_dist=True,
         )
-    '''
+
+        #self.mean_weights_per_epoch.clear()
+        
     def configure_optimizers(self):
         self.optimizer = optim.AdamW([{'params': self.parameters(), 'lr': self.lr}])
         #self.optimizer = optim.SGD([{'params': self.parameters(), 'lr': self.lr, 'momentum': 0.9, 'weight_decay': 0.001}])
 
         self.scheduler = CosineAnnealingLR(self.optimizer, 
-                                      T_max = self.max_epochs,
+                                      T_max = self.epochs,
                                       eta_min=0, last_epoch=-1)
         #return self.optimizer
         

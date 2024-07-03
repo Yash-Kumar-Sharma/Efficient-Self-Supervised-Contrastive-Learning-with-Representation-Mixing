@@ -5,7 +5,7 @@ import torch
 import torchvision
 from torch.optim.lr_scheduler import CosineAnnealingLR, OneCycleLR
 from Loss.loss import xent_loss
-from Utils.metric.similarity_mean import Positive_Negative_Mean
+from metric.similarity_mean import Positive_Negative_Mean
 import config
 import torchmetrics
 import torch.nn.functional as F
@@ -45,8 +45,6 @@ class OurModel(pl.LightningModule):
         
         self.model_name = config.model.name
         self.backbone = config.backbone.name
-        self.mode = config.feature.mode
-        self.imb_type = config.imbalance.imb_type
 
         self.accuracy = torchmetrics.Accuracy(task = 'multiclass', num_classes = config.dataset.num_classes)
         self.loss_metric = torchmetrics.MeanMetric()
@@ -145,7 +143,7 @@ class OurModel(pl.LightningModule):
         if((self.current_epoch + 1) % 10 == 0):
             save_path = os.path.join(self.save_path, self.model_name,
                                     "Pretrained_Model",self.dataset,
-                                    self.backbone,self.mode,self.imb_type)
+                                    self.backbone)
 
             if(not os.path.exists(save_path)):
                 os.makedirs(save_path)
@@ -185,37 +183,6 @@ class OurModel(pl.LightningModule):
             prog_bar = True,
             sync_dist=True,
         )
-    ''' 
-    def validation_step(self, batch, batch_idx): 
-        train_x, _ = batch
-        
-        #data = torch.stack(x,dim=1)
-        #data_transform = torch.stack(y,dim=1)
-        #d = data.size()
-
-        #train_x = data.view(d[0]*2*self.K, d[2],d[3],d[4])
-        #train_x_transform = data_transform.view(d[0]*2*self.K, d[2],d[3],d[4])
-        
-        embeddings = self.forward(train_x)
-        norm_embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
-        #embeddings_transform = self.forward(train_x_transform)
-        #norm_embeddings_transform = torch.nn.functional.normalize(embeddings_transform, p=2, dim=1)
-
-        #newEmbeddings = torch.add(norm_embeddings, norm_embeddings_transform)
-        #norm_embeddings = torch.nn.functional.normalize(newEmbeddings, p=2, dim=1)
-        loss = xent_loss(norm_embeddings)
-
-        self.log_dict(
-            {
-                'val_loss': loss,
-                'step': self.current_epoch,
-            },
-            on_step = False,
-            on_epoch = True,
-            prog_bar = True,
-            sync_dist=True,
-        )
-    '''
     def configure_optimizers(self):
         self.optimizer = optim.AdamW([{'params': self.parameters(), 'lr': self.lr, 'weight_decay': self.weight_decay}])
         #self.optimizer = optim.SGD([{'params': self.parameters(), 'lr': self.lr, 'momentum': 0.9, 'weight_decay': self.weight_decay}])

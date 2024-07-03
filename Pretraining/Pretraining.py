@@ -8,12 +8,10 @@ import time
 
 from models.OurModel import OurModel
 from models.SimclrModel import SimclrModel
-from models.SimclrV2Model import SimclrV2Model
 from models.MocoModel import MocoModel
 from models.Modified_Simclr1 import Modified_Simclr1Model
 from models.Modified_Simclr2 import Modified_Simclr2Model
 from models.Modified_Simclr3 import Modified_Simclr3Model
-from models.SimSiamModel import SimSiamModel
 
 #from cifar10_dataset import Cifar10_DataModule
 from pytorch_lightning.loggers import TensorBoardLogger
@@ -25,7 +23,6 @@ from data.Imagenet.imagenet_dataset import Imagenet_DataModule
 from data.TinyImagenet.tinyImagenet_dataset import TinyImagenet_DataModule
 from data.Cifar100.cifar100_dataset import Cifar100_DataModule
 from data.Cifar10.cifar10_dataset import Cifar10_DataModule
-from data.Cifar10.cifar10_lt_dataset import Cifar10_DataModuleLT
 from data.STL10.stl10_dataset import Stl10_DataModule
 
 class PrintTime(Callback):
@@ -47,29 +44,10 @@ def Get_Model(model_name):
     return globals()['generated_model']
     
 
-def Get_Dataset(dataset_name, extension):
+def Get_Dataset(dataset_name):
     dataset_function = dataset_name + "_DataModule"
-    if(extension == "LT"):
-        dataset_function = dataset_function + "LT"
     exec(f"generated_dataset = {dataset_function}", globals())
     return globals()['generated_dataset']
-'''
-class ToggleGPUCallback(pl.Callback):
-    def __init__(self, multi_gpu, single_gpu):
-        super().__init__()
-        self.multi_gpu = multi_gpu
-        self.single_gpu = single_gpu
-        self.use_single_gpu = False
-
-    def on_epoch_end(self, trainer, pl_module):
-        if self.use_single_gpu:
-            trainer.gpus = self.single_gpu
-            print("Switching to single GPU...")
-        else:
-            trainer.gpus = self.multi_gpu
-            print("Switching to multi-GPU...")
-        self.use_single_gpu = not self.use_single_gpu
-'''
 
 #@hydra.main(config_path="config", config_name="config.yaml", version_base=None)
 def Pretraining(config):
@@ -81,8 +59,8 @@ def Pretraining(config):
         schedule = torch.profiler.schedule(skip_first = 10, wait=1, warmup=1, active=20),
     )
 
-    checkpoint_path = os.path.join("results", config.dataset.name + "_pretrain", config.feature.mode, config.imbalance.imb_type, config.backbone.name)
-    pretrained_filename = os.path.join(checkpoint_path, (config.model.name + config.feature.LT + "Model.ckpt"))
+    checkpoint_path = os.path.join("results", config.dataset.name + "_pretrain", config.backbone.name)
+    pretrained_filename = os.path.join(checkpoint_path, (config.model.name + "Model.ckpt"))
 
     checkpoint_callback = ModelCheckpoint(dirpath=pretrained_filename,
                                           #save_weights_only=True,
@@ -95,7 +73,7 @@ def Pretraining(config):
 
     generated_model = Get_Model(config.model.name)
     model = generated_model(config)
-    generated_dataset = Get_Dataset(config.dataset.name, config.feature.LT)
+    generated_dataset = Get_Dataset(config.dataset.name)
     dm = generated_dataset(config)
 
     trainer = pl.Trainer(

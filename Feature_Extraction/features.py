@@ -8,7 +8,7 @@ import torch
 def prepare_data_features(model, dataset, config):
     
     device = config.training.device
-    if(config.transfer_learning.transfer_learning):
+    if(config.post_training.transfer_learning):
         network = deepcopy(model)
     else:
         network = deepcopy(model.net)

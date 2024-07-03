@@ -26,7 +26,7 @@ def main(cfg: DictConfig):
     #pretraining = config.TrainingConfig(model = "Simclr")
     #print(pretraining._getConfig())
     
-    if(cfg.transfer_learning.transfer_learning):
+    if(cfg.post_training.transfer_learning):
         Transfer_Learning(cfg)
     else:
         trained_model = Pretraining(cfg) 

@@ -4,7 +4,7 @@ import torch
 import torchvision
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from Loss.Modified1_loss import xent_loss
-from Utils.metric.similarity_mean import Modified_Positive_Negative_Mean
+from metric.similarity_mean import Modified_Positive_Negative_Mean
 import torchmetrics
 import torch.nn.functional as F
 from functools import reduce

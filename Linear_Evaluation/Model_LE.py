@@ -30,10 +30,6 @@ class linearlayer_training(pl.LightningModule):
         self.steps = config.post_training.steps
         self.weight_decay = config.post_training.weight_decay
         
-        self.mode = config.feature.mode
-        self.imb_type = config.imbalance.imb_type
-
-        
         self.outputs = []
         self.val_outputs = []
         self.accuracy = torchmetrics.Accuracy(task = 'multiclass', num_classes = self.num_classes)
@@ -191,7 +187,7 @@ class linearlayer_training(pl.LightningModule):
         #save linear layer .. 
         save_path = os.path.join(self.save_path, self.model_name,
                                 "Pretrained_LinearLayer",self.dataset,
-                                self.backbone,self.mode, self.imb_type)
+                                self.backbone)
 
         if(not os.path.exists(save_path)):
             os.makedirs(save_path)

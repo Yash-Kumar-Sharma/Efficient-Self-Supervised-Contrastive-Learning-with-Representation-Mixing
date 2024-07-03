@@ -28,7 +28,7 @@ def Get_Dataset(dataset_name):
 
 def Transfer_Learning(config):
      
-    linear_checkpoint_path = os.path.join("results", config.dataset.name + "_linear", config.feature.mode, config.imbalance.imb_type)
+    linear_checkpoint_path = os.path.join("results", config.dataset.name + "_linear")
     logger = TensorBoardLogger("results/pretrain_logs", name = "my_model_v1")
     
     pretrained_filename = os.path.join(linear_checkpoint_path, (config.model.name + "ModelLE.ckpt"))
@@ -43,10 +43,10 @@ def Transfer_Learning(config):
     model = linearlayer_training(config)
     generated_dataset = Get_Dataset(config.dataset.name)
     trained_model = utils.GetBackbone(config.backbone.name, config.dataset.name)
-    print(config.transfer_learning.transfer_dataset + " -----> " + config.dataset.name)
+    print(config.post_training.transfer_from + " -----> " + config.dataset.name)
     save_path = os.path.join(config.dataset.save_path, config.model.name,
-                            "Pretrained_Model",config.transfer_learning.transfer_dataset,
-                            config.backbone.name, "pytorch_lightning", "model200.tar")
+                            "Pretrained_Model",config.post_training.transfer_from,
+                            config.backbone.name, "model200.tar")
     print(save_path)
     checkpoint = torch.load(save_path)
     trained_model.load_state_dict(checkpoint["model"])
