@@ -1,10 +1,7 @@
 name: Cifar100
-data_dir: /home/gen/yash/OurData/data/
-save_path: /home/gen/yash/work/Result_zip/LT-Results
-#save_path: /home/gen/yash/work/SimclrUpdated/CIFAR-10/resnet20/backbone200.tar
-#save_path: /home/gen/yash/work/Result_zip/Vision-SSL-Results/Simclr/Pretrained_Model/cifar-10/resnet20/backbone200.tar
-filepath: results/MeanWeights
-
+data_dir: #Path to your Dataset
+save_path: #Path to save the backbone
+filepath: #Path to save weights
 K: 1
 crop_max: 1
 knn_k: 200

@@ -1,9 +1,10 @@
 name: TinyImagenet
-data_dir: /home/gen/yash/OurData/data/tiny-imagenet-200/
-data_list: /home/gen/yash/OurData/data/tiny-imagenet-200/wnids.txt
-val_list: /home/gen/yash/OurData/data/tiny-imagenet-200/val/out.txt
-save_path: /home/gen/yash/work/Result_zip/LT-Results
-filepath: results/MeanWeights
+data_dir: #Path to your Dataset
+save_path: #Path to save the backbone
+filepath: #Path to save weights
+
+data_list: #Path for datafile wnids.txt
+val_list: #Path for data file out.txt
 
 K: 1
 crop_max: 1
