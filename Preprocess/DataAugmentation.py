@@ -20,11 +20,11 @@ class DataAugmentation(nn.Module):
         
         self.transforms = nn.Sequential(
             #ColorJiggle(brightness=0.8, contrast=0.8,saturation=0.8, hue=0.2),
-            ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1, p=0.8),
+            ColorJitter(brightness=0.8, contrast=0.8, saturation=0.8, hue=0.2, p=0.8),
             RandomGrayscale(p=0.2),
             #RandomResizedCrop(size=self.image_size, scale=(0.08, self.crop_max)),
             RandomResizedCrop(size=(self.image_size, self.image_size),
-                              scale=(0.2, self.crop_max)),
+                              scale=(0.08, self.crop_max)),
             RandomHorizontalFlip(p=0.5),
             
             GaussianBlur2d(kernel_size = (self.kernel_size, self.kernel_size), sigma = (0.1, 2.0)),
