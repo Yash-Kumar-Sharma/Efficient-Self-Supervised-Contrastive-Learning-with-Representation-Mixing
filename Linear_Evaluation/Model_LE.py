@@ -152,36 +152,6 @@ class linearlayer_training(pl.LightningModule):
             #sync_dist=True,
         )
         
-
-    def on_test_epoch_end(self):
-        #import pdb
-        #pdb.set_trace()
-        #self.y_test = [item.cpu().tolist() for item in self.y_test]
-        #self.pred = [item.cpu().tolist() for item in self.pred]
-
-        acc_per_class = torchmetrics.functional.accuracy(torch.Tensor(self.y_test), torch.Tensor(self.pred), task='multiclass',num_classes=self.num_classes,average = 'none')
-        print(acc_per_class)
-        cm = multilabel_confusion_matrix(self.y_test, self.pred)
-        print(cm)
-        numerator = [x[0][0] + x[1][1] for x in cm]
-        denominator = [np.sum(x) for x in cm]
-        for i in range(10):
-            self.test_accuracy.append(numerator[i] / denominator[i])
-        
-        acc_out = ["%.2f" % x for x in self.test_accuracy]
-        acc_train_out = ["%.2f" % x for x in self.train_accuracy]
-
-        print(acc_train_out)
-        print(acc_out)
-        sklearn_precision = precision_score(self.y_test,self.pred,average='weighted')
-        print("Precision = ",sklearn_precision)
-
-        sklearn_recall = recall_score(self.y_test,self.pred, average='weighted')
-        print("Recall = ",sklearn_recall)
-
-        sklearn_f1_score = f1_score(self.y_test,self.pred, average='weighted')
-        print("F1_score = ",sklearn_f1_score)
-    
     def Save_LinearLayer(self):
 
         #save linear layer .. 
