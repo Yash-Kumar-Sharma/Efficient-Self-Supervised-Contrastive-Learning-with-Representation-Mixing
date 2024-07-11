@@ -11,7 +11,6 @@ import torch.nn.functional as F
 from functools import reduce
 import operator
 import os
-import matplotlib.pyplot as plt
 import pickle
 import numpy as np
 import collections
@@ -19,17 +18,6 @@ from copy import deepcopy
 import os
 from Pretraining.Knn_Monitor import Knn_Monitor
 import utils
-
-def stack(data, dim=0):
-  shape = data[0].shape  # need to handle empty list
-  shape = shape[:dim] + (len(data),) + shape[dim:]
-  x = torch.cat(data, dim=dim)
-  x = x.reshape(shape)
-  # need to handle case where dim=-1
-  # which is not handled here yet
-  # but can be done with transposition
-  return x
-
 
 class ModelBase(nn.Module):
     """
@@ -40,9 +28,6 @@ class ModelBase(nn.Module):
     """
     def __init__(self, backbone, config):
         super(ModelBase, self).__init__()
-        #self.traininfo, self.datainfo, self.mocoinfo = GetMocoInfo()
-        #self.info = info
-        #self.net = utils.GetResnetNetwork(self.datainfo["arch"])
         self.net = nn.Sequential(collections.OrderedDict([
           ("backbone", backbone)
         ]))
@@ -60,7 +45,6 @@ class ModelBase(nn.Module):
     def forward(self, x):
         x = self.net(x)
         x = self.head(x)
-        # note: not normalized here
         return x
 
 class MocoModel(pl.LightningModule):
@@ -68,11 +52,8 @@ class MocoModel(pl.LightningModule):
         super().__init__()
         
         self.save_hyperparameters()
-        #self.automatic_optimization = False
 
         self.net = utils.GetBackbone(config.backbone.name, config.dataset.name)
-        #self.net.conv1 = nn.Conv2d(3, 64, 3, 1, 1, bias = False)
-        #self.net.maxpool = nn.Identity()
         
         self.lr = config.training.lr
         self.epochs = config.training.max_epochs
@@ -101,7 +82,6 @@ class MocoModel(pl.LightningModule):
 
         # create the queue
         self.register_buffer("queue", torch.randn(config.model.projection_size, self.K))
-        #self.register_buffer("queue", torch.randn(self.dim, self.K))
         self.queue = nn.functional.normalize(self.queue, dim=0)
 
         self.register_buffer("queue_ptr", torch.zeros(1, dtype=torch.long))
@@ -125,9 +105,6 @@ class MocoModel(pl.LightningModule):
      
     @torch.no_grad()
     def _momentum_update_key_encoder(self):
-        """
-        Momentum update of the key encoder
-        """
         for param_q, param_k in zip(self.encoder_q.parameters(), self.encoder_k.parameters()):
             param_k.data = param_k.data * self.m + param_q.data * (1. - self.m)
 
@@ -146,9 +123,6 @@ class MocoModel(pl.LightningModule):
 
     @torch.no_grad()
     def _batch_shuffle_single_gpu(self, x):
-        """
-        Batch shuffle, for making use of BatchNorm.
-        """
         # random shuffle index
         idx_shuffle = torch.randperm(x.shape[0]).to(self.device)
 
@@ -159,9 +133,6 @@ class MocoModel(pl.LightningModule):
 
     @torch.no_grad()
     def _batch_unshuffle_single_gpu(self, x, idx_unshuffle):
-        """
-        Undo batch shuffle.
-        """
         return x[idx_unshuffle]
 
     def contrastive_loss(self, im_q, im_k):
@@ -171,25 +142,17 @@ class MocoModel(pl.LightningModule):
 
         # compute key features
         with torch.no_grad():  # no gradient to keys
-            # shuffle for making use of BN
             im_k_, idx_unshuffle = self._batch_shuffle_single_gpu(im_k)
 
             k = self.encoder_k(im_k_)  # keys: NxC
             k = nn.functional.normalize(k, dim=1)  # already normalized
 
-            # undo shuffle
             k = self._batch_unshuffle_single_gpu(k, idx_unshuffle)
 
-        # compute logits
-        # Einstein sum is more intuitive
-        # positive logits: Nx1
         l_pos = torch.einsum('nc,nc->n', [q, k]).unsqueeze(-1)
-        # negative logits: NxK
         l_neg = torch.einsum('nc,ck->nk', [q, self.queue.clone().detach()])
-        # logits: Nx(1+K)
         logits = torch.cat([l_pos, l_neg], dim=1)
 
-        # apply temperature
         logits /= self.T
 
         # labels: positive key indicators
@@ -199,13 +162,6 @@ class MocoModel(pl.LightningModule):
         return loss, q, k, l_pos.mean(), l_neg.mean()
 
     def GetLoss(self, im1, im2):
-        """
-        Input:
-            im_q: a batch of query images
-            im_k: a batch of key images
-        Output:
-            loss
-        """
 
         # update the key encoder
         with torch.no_grad():  # no gradient to keys
@@ -229,13 +185,9 @@ class MocoModel(pl.LightningModule):
          
         train_x, train_y = batch
         self.optimizer.zero_grad()
-        
-        #self.embeddings = self.net(train_x)
-        
         loss, pos_mean, neg_mean = self.GetLoss(train_x, train_y)
 
         self.loss_metric.update(loss)
-        #pos_mean, neg_mean = Positive_Negative_Mean(x = self.embeddings, device = self.global_rank, batch_size = self.batch_size)
         self.pos_mean += pos_mean * len(train_x)
         self.neg_mean += neg_mean * len(train_x)
         self.total += len(train_x)
@@ -264,21 +216,6 @@ class MocoModel(pl.LightningModule):
         
 
         return loss
-    # Function to count convolutional layers
-    def count_conv_layers(self, model):
-        count = 0
-        for name, module in model.named_modules():
-            if isinstance(module, nn.Conv2d):
-                count += 1
-        return count
-
-    # Function to record convolutional layer configurations
-    def record_conv_configs(self, model):
-        configs = []
-        for name, module in model.named_modules():
-            if isinstance(module, nn.Conv2d):
-                configs.append((name, module.kernel_size, module.stride, module.padding))
-        return configs    
 
     def on_train_epoch_end(self):
         #pos_mean, neg_mean = Positive_Negative_Mean(x = self.embeddings, device = self.global_rank, batch_size = self.batch_size)
@@ -313,24 +250,6 @@ class MocoModel(pl.LightningModule):
                 print("Path created...")
             file_path = os.path.join(save_path, "model" + str(self.current_epoch + 1) + ".tar")
             self.Save(file_path)
-        configs = self.record_conv_configs(self.net)
-        self.conv_layer_configs.append(configs)
-
-        if(self.current_epoch + 1 == self.epochs):
-            convfilename = os.path.join(self.filepath, ("file.pkl"))
-            lossfilename = os.path.join(self.filepath, "loss.txt")
-            
-            if not os.path.exists(self.filepath):
-                os.makedirs(self.filepath)
-
-            filename = os.path.join(convfilename)
-            file = open(filename,"wb")
-            lossfile = open(lossfilename, "wb")
-            pickle.dump(self.conv_layer_configs, file)
-            pickle.dump(self.loss_value, lossfile)
-            lossfile.close()
-            file.close()
-            print("Saved")
         
         top1 = self.knn_monitor.test(deepcopy(self.encoder_q.net.backbone))
 

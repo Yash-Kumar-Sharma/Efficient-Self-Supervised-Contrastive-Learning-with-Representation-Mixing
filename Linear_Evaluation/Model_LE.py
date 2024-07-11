@@ -1,8 +1,7 @@
 from torch import nn, optim
 import pytorch_lightning as pl
 import torch
-from torch.optim.lr_scheduler import CosineAnnealingLR, OneCycleLR
-#import config
+from torch.optim.lr_scheduler import CosineAnnealingLR
 import torchmetrics
 import os
 
@@ -58,9 +57,6 @@ class linearlayer_training(pl.LightningModule):
         output = self.forward(data)
         loss = self.criterion(output, target)
         self.loss_metric.update(loss)
-        #self.manual_backward(loss)
-        #self.optimizer.step()
-        #self.scheduler.step()
         _, predicted = torch.max(output.data, 1)
         self.y_test.extend(target.cpu())
         self.pred.extend(predicted.cpu())
@@ -110,25 +106,7 @@ class linearlayer_training(pl.LightningModule):
         self.y_test.clear()
         self.pred.clear()
         #self.Save_LinearLayer()
-    '''
-    def validation_step(self, batch, batch_idx):    
-        data, target = batch
-        output = self.forward(data)
-        loss = self.criterion(output, target)
-        accuracy = self.accuracy(output, target)
 
-        self.log_dict(
-            {
-                'val_loss': loss,
-                'val_accuracy': accuracy,
-                'step': self.current_epoch,
-            },
-            on_step = False,
-            on_epoch = True,
-            prog_bar = True,
-            sync_dist=True,
-        )
-    '''
     def test_step(self, batch, batch_idx): 
         data, target = batch
         output = self.forward(data)
@@ -187,8 +165,6 @@ class linearlayer_training(pl.LightningModule):
                                       T_max = self.epochs,
                                       eta_min=0, last_epoch=-1)
         #return [self.optimizer], [self.scheduler]
-        
-        #self.scheduler = OneCycleLR(self.optimizer, max_lr = self.lr, epochs = self.epochs, steps_per_epoch = self.steps)
         
         return {
             'optimizer': self.optimizer,

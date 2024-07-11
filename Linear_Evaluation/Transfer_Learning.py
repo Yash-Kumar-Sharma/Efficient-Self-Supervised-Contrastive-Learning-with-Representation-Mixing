@@ -32,7 +32,6 @@ def Transfer_Learning(config):
     logger = TensorBoardLogger("results/pretrain_logs", name = "my_model_v1")
     
     pretrained_filename = os.path.join(linear_checkpoint_path, (config.model.name + "ModelLE.ckpt"))
-    #pretrained_filename = config.dataset.save_path
     
     checkpoint_callback = ModelCheckpoint(dirpath=pretrained_filename,
                                                  #save_weights_only=True,
@@ -64,13 +63,6 @@ def Transfer_Learning(config):
         log_every_n_steps=1,
     )
     
-    #if(os.path.exists(pretrained_filename)):
-    #    print("Linear Layer Loading ...")
-    #    saved_linearlayer = "epoch=" + str(config.checkpoint_ll) + "-step=" + str(config.checkpoint_ll) + ".ckpt"
-        #model = OurModel_LE.load_from_checkpoint(pretrained_filename)
-    #    trainer.fit(model, dm, ckpt_path=os.path.join(pretrained_filename, saved_linearlayer))
-    #else:
     pl.seed_everything(42)
     trainer.fit(model, dm)
-    #trainer.validate(model, dm)
     trainer.test(model, dm)

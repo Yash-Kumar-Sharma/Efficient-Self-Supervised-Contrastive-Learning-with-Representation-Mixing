@@ -10,19 +10,9 @@ import torch.nn.functional as F
 from functools import reduce
 import operator
 import os
-import matplotlib.pyplot as plt
 import pickle
 import numpy as np
-
-def stack(data, dim=0):
-  shape = data[0].shape  # need to handle empty list
-  shape = shape[:dim] + (len(data),) + shape[dim:]
-  x = torch.cat(data, dim=dim)
-  x = x.reshape(shape)
-  # need to handle case where dim=-1
-  # which is not handled here yet
-  # but can be done with transposition
-  return x
+import utils
 
 class Modified_Simclr2Model(pl.LightningModule):
     def __init__(self, config):
@@ -30,10 +20,7 @@ class Modified_Simclr2Model(pl.LightningModule):
         
         self.save_hyperparameters()
         #self.automatic_optimization = False
-        
-        self.net = torchvision.models.resnet18(weights = None, num_classes = config.model.projection_size * 4)
-        self.net.conv1 = nn.Conv2d(3, 64, 3, 1, 1, bias = False)
-        self.net.maxpool = nn.Identity()
+        self.net = utils.GetBackbone(config.backbone.name, config.dataset.name)
         
         self.net.fc = nn.Sequential(
             self.net.fc,
@@ -107,21 +94,6 @@ class Modified_Simclr2Model(pl.LightningModule):
             self.logger.experiment.add_image("Cifar_A", grid_x, self.current_epoch)
         
         return loss
-    # Function to count convolutional layers
-    def count_conv_layers(self, model):
-        count = 0
-        for name, module in model.named_modules():
-            if isinstance(module, nn.Conv2d):
-                count += 1
-        return count
-
-    # Function to record convolutional layer configurations
-    def record_conv_configs(self, model):
-        configs = []
-        for name, module in model.named_modules():
-            if isinstance(module, nn.Conv2d):
-                configs.append((name, module.kernel_size, module.stride, module.padding))
-        return configs    
 
     def on_train_epoch_end(self):
         #pos_mean, neg_mean = Positive_Negative_Mean(x = self.embeddings, device = self.global_rank, batch_size = self.batch_size)
@@ -157,64 +129,13 @@ class Modified_Simclr2Model(pl.LightningModule):
             file_path = os.path.join(save_path, "model" + str(self.current_epoch + 1) + ".tar")
             self.Save(file_path)
         
-        configs = self.record_conv_configs(self.net)
-        self.conv_layer_configs.append(configs)
-
-        if(self.current_epoch + 1 == config.max_epochs):
-            convfilename = os.path.join(self.filepath, ("file.pkl"))
-            lossfilename = os.path.join(self.filepath, "loss.txt")
-            
-            if not os.path.exists(self.filepath):
-                os.makedirs(self.filepath)
-
-            filename = os.path.join(convfilename)
-            file = open(filename,"wb")
-            lossfile = open(lossfilename, "wb")
-            pickle.dump(self.conv_layer_configs, file)
-            pickle.dump(self.loss_value, lossfile)
-            lossfile.close()
-            file.close()
-            print("Saved")
-            
-            #self.mean_weights_per_epoch.clear()
         
-    ''' 
-    def validation_step(self, batch, batch_idx): 
-        train_x, _ = batch
-        
-        #data = torch.stack(x,dim=1)
-        #data_transform = torch.stack(y,dim=1)
-        #d = data.size()
-
-        #train_x = data.view(d[0]*2*self.K, d[2],d[3],d[4])
-        #train_x_transform = data_transform.view(d[0]*2*self.K, d[2],d[3],d[4])
-        
-        embeddings = self.forward(train_x)
-        norm_embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
-        #embeddings_transform = self.forward(train_x_transform)
-        #norm_embeddings_transform = torch.nn.functional.normalize(embeddings_transform, p=2, dim=1)
-
-        #newEmbeddings = torch.add(norm_embeddings, norm_embeddings_transform)
-        #norm_embeddings = torch.nn.functional.normalize(newEmbeddings, p=2, dim=1)
-        loss = xent_loss(norm_embeddings)
-
-        self.log_dict(
-            {
-                'val_loss': loss,
-                'step': self.current_epoch,
-            },
-            on_step = False,
-            on_epoch = True,
-            prog_bar = True,
-            sync_dist=True,
-        )
-    '''
     def configure_optimizers(self):
         self.optimizer = optim.AdamW([{'params': self.parameters(), 'lr': self.lr}])
         #self.optimizer = optim.SGD([{'params': self.parameters(), 'lr': self.lr, 'momentum': 0.9, 'weight_decay': 0.001}])
 
         self.scheduler = CosineAnnealingLR(self.optimizer, 
-                                      T_max = config.max_epochs,
+                                      T_max = self.max_epochs,
                                       eta_min=0, last_epoch=-1)
         #return self.optimizer
         

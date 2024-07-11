@@ -2,9 +2,6 @@ import pytorch_lightning as pl
 import torch
 import os
 import time
-#import config
-#import hydra
-#from omegaconf import DictConfig
 
 from models.OurModel import OurModel
 from models.SimclrModel import SimclrModel
@@ -13,7 +10,6 @@ from models.Modified_Simclr1 import Modified_Simclr1Model
 from models.Modified_Simclr2 import Modified_Simclr2Model
 from models.Modified_Simclr3 import Modified_Simclr3Model
 
-#from cifar10_dataset import Cifar10_DataModule
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.profilers import PyTorchProfiler
 from pytorch_lightning.strategies import DeepSpeedStrategy
@@ -49,7 +45,6 @@ def Get_Dataset(dataset_name):
     exec(f"generated_dataset = {dataset_function}", globals())
     return globals()['generated_dataset']
 
-#@hydra.main(config_path="config", config_name="config.yaml", version_base=None)
 def Pretraining(config):
     strategy = DeepSpeedStrategy(logging_batch_size_per_gpu=config.dataset.batch_size)
     logger = TensorBoardLogger("results/pretrain_logs", name = "my_model_v1")
@@ -90,10 +85,6 @@ def Pretraining(config):
         log_every_n_steps=1,
         #reload_dataloaders_every_n_epochs=1
     )
-    
-    # Create ToggleGPUCallback
-    #toggle_gpu_callback = ToggleGPUCallback(config.training.devices, config.training.device)
-    #trainer.callbacks.append(toggle_gpu_callback)
     
     if(os.path.exists(pretrained_filename)):
         print("Model Loading..." )

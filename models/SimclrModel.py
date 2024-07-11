@@ -11,7 +11,6 @@ import torch.nn.functional as F
 from functools import reduce
 import operator
 import os
-import matplotlib.pyplot as plt
 import pickle
 import numpy as np
 import utils
@@ -98,24 +97,8 @@ class SimclrModel(pl.LightningModule):
             self.logger.experiment.add_image("Cifar_A", grid_x, self.current_epoch)
         
         return loss
-    # Function to count convolutional layers
-    def count_conv_layers(self, model):
-        count = 0
-        for name, module in model.named_modules():
-            if isinstance(module, nn.Conv2d):
-                count += 1
-        return count
-
-    # Function to record convolutional layer configurations
-    def record_conv_configs(self, model):
-        configs = []
-        for name, module in model.named_modules():
-            if isinstance(module, nn.Conv2d):
-                configs.append((name, module.kernel_size, module.stride, module.padding))
-        return configs    
 
     def on_train_epoch_end(self):
-        #pos_mean, neg_mean = Positive_Negative_Mean(x = self.embeddings, device = self.global_rank, batch_size = self.batch_size)
          
         self.log_dict(
             {
@@ -131,7 +114,6 @@ class SimclrModel(pl.LightningModule):
         self.loss_value.append(self.loss_metric.compute().cpu().numpy())
         self.loss_metric.reset()
         self.accuracy.reset()
-        #self.loss_meter = torch.tensor(0)
         self.pos_mean = 0.0
         self.neg_mean = 0.0
         self.total = 0
@@ -147,26 +129,6 @@ class SimclrModel(pl.LightningModule):
                 print("Path created...")
             file_path = os.path.join(save_path, "model" + str(self.current_epoch + 1) + ".tar")
             self.Save(file_path)
-        
-        configs = self.record_conv_configs(self.net)
-        self.conv_layer_configs.append(configs)
-
-        if(self.current_epoch + 1 == self.max_epochs):
-            convfilename = os.path.join(self.filepath, ("file.pkl"))
-            lossfilename = os.path.join(self.filepath, "loss.txt")
-            
-            if not os.path.exists(self.filepath):
-                os.makedirs(self.filepath)
-
-            filename = os.path.join(convfilename)
-            file = open(filename,"wb")
-            lossfile = open(lossfilename, "wb")
-            pickle.dump(self.conv_layer_configs, file)
-            pickle.dump(self.loss_value, lossfile)
-            lossfile.close()
-            file.close()
-            print("Saved")
-            
         
         top1 = self.knn_monitor.test(deepcopy(self.net))
 
