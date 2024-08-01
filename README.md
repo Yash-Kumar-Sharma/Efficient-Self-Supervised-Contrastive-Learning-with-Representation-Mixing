@@ -1,7 +1,7 @@
 # Efficient-Self-Supervised-Contrastive-Learning-with-Representation-Mixing
    This is an official implementations of the paper "Efficient Self Supervised Contrastive Learning with Representation Mixing".
 
-# Requirements<br />
+# Requirements
 
    Python              - 3.10.12 <br />
    Tensorboard         - 2.13.0  <br />
@@ -47,22 +47,22 @@
 
  (Pretraining & linear_evaluation)
 
-   python3 main.py dataset.data_dir="path_to_dataset" dataset.save_path="path_to_save_model_on_each_nth_epoch"
-   Note - Default dataset is Cifar10, Default model is Simclr, Default backbone is resnet20
+   python3 main.py dataset.data_dir="path_to_dataset" dataset.save_path="path_to_save_model_on_each_nth_epoch" <br />
+   Note - Default dataset is Cifar10, Default model is Simclr, Default backbone is resnet20 <br />
 
-# or 
+or 
 
    As per the config files hierarchy use command line arguments to feed new values
 
-# or
+or
 
-   Make changes in respective config file and then run python3 main.py
+   Make changes in respective config file and then run - python3 main.py
 
  (Transfer_Learning)
 
-   Run python3.main post_training=transfer_learning
-   Note - Modify post_training/transfer_learning as per the requirements
-   It works like - source dataset = transfer_learning.transfer_from, target_dataset = dataset (from config.yaml)
+   Run python3.main post_training=transfer_learning <br />
+   Note - Modify post_training/transfer_learning as per the requirements <br />
+   It works like - source dataset = transfer_learning.transfer_from, target_dataset = dataset (from config.yaml) <br />
 
 # You can access the tensorboard logs using
 
