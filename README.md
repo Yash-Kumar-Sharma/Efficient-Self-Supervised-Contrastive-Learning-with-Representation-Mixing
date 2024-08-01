@@ -49,11 +49,11 @@ This is an official implementations of the paper "Efficient Self Supervised Cont
     python3 main.py dataset.data_dir="path_to_dataset" dataset.save_path="path_to_save_model_on_each_nth_epoch" 
     Note - Default dataset is Cifar10, Default model is Simclr, Default backbone is resnet20 
 
-####or 
+#### or 
 
     As per the config files hierarchy use command line arguments to feed new values
 
-####or
+#### or
 
     Make changes in respective config file and then run - python3 main.py
 
