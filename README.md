@@ -11,18 +11,22 @@
 ## config settings
 
  config
+
     config.yaml
+
     backbone
         resnet18.yaml
         resnet20.yaml
         resnet32.yaml
         resnet50.yaml
+
     dataset
         Cifar100.yaml
         Cifar10.yaml
         Imagenet.yaml
         Stl10.yaml
         TinyImagenet.yaml
+
     model
         Moco.yaml
         Modified1.yaml
@@ -30,9 +34,11 @@
         Modified3.yaml
         Our.yaml
         Simclr.yaml
+
     post_training
         linear_evaluation.yaml
         transfer_learning.yaml
+
     training
         defauly.yaml
         pretraining.yaml
@@ -42,8 +48,8 @@
 ### (Pretraining & linear_evaluation)
     <html>
         <body>
-            <p>python3 main.py dataset.data_dir="path_to_dataset" dataset.save_path="path_to_save_model_on_each_nth_epoch" <br />
-            <p>Note - Default dataset is Cifar10, Default model is Simclr, Default backbone is resnet20 <br />
+            <p>python3 main.py dataset.data_dir="path_to_dataset" dataset.save_path="path_to_save_model_on_each_nth_epoch"</p> <br />
+            <p>Note - Default dataset is Cifar10, Default model is Simclr, Default backbone is resnet20 </p><br />
         </body>
     </html>
 
