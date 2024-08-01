@@ -1,14 +1,11 @@
 import pytorch_lightning as pl
-import torchvision
 from data.OurModel_Data import OurDataFromImagenet
 from data.Simclr_Data import SimclrDataFromImagenet
 from data.Moco_Data import MocoDataFromImagenet
 
-#import config
 from torch.utils.data import DataLoader
 from Preprocess.Preprocess import Preprocess
 from Preprocess.DataAugmentation import DataAugmentation
-import os
 
 class Imagenet_DataModule(pl.LightningDataModule):
     def __init__(self, config):

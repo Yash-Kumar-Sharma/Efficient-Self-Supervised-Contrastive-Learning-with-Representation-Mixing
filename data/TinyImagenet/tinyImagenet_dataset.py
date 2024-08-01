@@ -1,11 +1,9 @@
 import pytorch_lightning as pl
-import torchvision
 
 from data.OurModel_Data import OurDataFromTinyImagenet
 from data.Simclr_Data import SimclrDataFromTinyImagenet
 from data.Moco_Data import MocoDataFromTinyImagenet
 
-#import config
 from torch.utils.data import DataLoader
 from Preprocess.Preprocess import Preprocess
 from Preprocess.DataAugmentation import DataAugmentation

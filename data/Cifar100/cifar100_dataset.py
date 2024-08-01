@@ -1,10 +1,8 @@
 import pytorch_lightning as pl  
-import torchvision
 from data.OurModel_Data import OurDataFromCIFAR100
 from data.Simclr_Data import SimclrDataFromCIFAR100
 from data.Moco_Data import MocoDataFromCIFAR100
 
-#import config
 from torch.utils.data import DataLoader
 from Preprocess.Preprocess import Preprocess
 from Preprocess.DataAugmentation import DataAugmentation

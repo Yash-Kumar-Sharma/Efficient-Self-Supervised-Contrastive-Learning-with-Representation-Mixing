@@ -4,7 +4,6 @@ from Linear_Evaluation.Model_LE import linearlayer_training
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 import os
-import ResnetVersions
 import torch
 from data.Cifar100.cifar100_dataset_le import Cifar100_DataModule_le
 from data.Cifar10.cifar10_dataset_le import Cifar10_DataModule_le
@@ -43,9 +42,10 @@ def Transfer_Learning(config):
     generated_dataset = Get_Dataset(config.dataset.name)
     trained_model = utils.GetBackbone(config.backbone.name, config.dataset.name)
     print(config.post_training.transfer_from + " -----> " + config.dataset.name)
+    file_to_load = model + config.post_training.checkpoint_toload + ".tar" 
     save_path = os.path.join(config.dataset.save_path, config.model.name,
                             "Pretrained_Model",config.post_training.transfer_from,
-                            config.backbone.name, "model200.tar")
+                            config.backbone.name, file_to_load)
     print(save_path)
     checkpoint = torch.load(save_path)
     trained_model.load_state_dict(checkpoint["model"])

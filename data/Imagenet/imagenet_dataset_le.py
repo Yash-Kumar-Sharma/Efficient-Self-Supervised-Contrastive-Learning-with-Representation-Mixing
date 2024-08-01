@@ -4,7 +4,6 @@ import config
 from Feature_Extraction.features import prepare_data_features
 from torch.utils.data import DataLoader
 from data.OurModel_Data import Imagenet_Data
-import torchvision
 
 from Preprocess.Augmentations import model_transforms
 from Preprocess.Preprocess import Preprocess

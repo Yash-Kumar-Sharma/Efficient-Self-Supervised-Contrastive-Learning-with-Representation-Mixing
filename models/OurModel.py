@@ -1,4 +1,3 @@
-import ResnetVersions
 from torch import nn, optim
 import pytorch_lightning as pl
 import torch
@@ -6,14 +5,8 @@ import torchvision
 from torch.optim.lr_scheduler import CosineAnnealingLR, OneCycleLR
 from Loss.loss import xent_loss
 from metric.similarity_mean import Positive_Negative_Mean
-import config
 import torchmetrics
-import torch.nn.functional as F
-from functools import reduce
-import operator
 import os
-import pickle
-import numpy as np
 import utils
 from Pretraining.Knn_Monitor import Knn_Monitor
 from copy import deepcopy
@@ -41,6 +34,7 @@ class OurModel(pl.LightningModule):
         self.weight_decay = config.training.weight_decay
         self.epochs = config.training.max_epochs
         self.steps = config.training.steps
+        self.checkpoint_tosave = config.training.checkpoint_tosave
         
         self.model_name = config.model.name
         self.backbone = config.backbone.name
@@ -122,7 +116,7 @@ class OurModel(pl.LightningModule):
         self.total = 0
         
         #save model .. 
-        if((self.current_epoch + 1) % 10 == 0):
+        if((self.current_epoch + 1) % self.checkpoint_tosave == 0):
             save_path = os.path.join(self.save_path, self.model_name,
                                     "Pretrained_Model",self.dataset,
                                     self.backbone)

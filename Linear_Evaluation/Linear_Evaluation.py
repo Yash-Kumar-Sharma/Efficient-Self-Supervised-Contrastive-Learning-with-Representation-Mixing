@@ -26,7 +26,7 @@ def Get_Dataset(dataset_name):
 
 def Linear_Evaluation(trained_model, config):
      
-    linear_checkpoint_path = os.path.join("results", config.dataset.name + "_linear", config.feature.mode, config.imbalance.imb_type)
+    linear_checkpoint_path = os.path.join("results", config.dataset.name + "_linear")
     logger = TensorBoardLogger("results/pretrain_logs", name = "my_model_v1")
     
     pretrained_filename = os.path.join(linear_checkpoint_path, (config.model.name + "ModelLE.ckpt"))

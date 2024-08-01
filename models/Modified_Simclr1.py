@@ -6,12 +6,7 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 from Loss.Modified1_loss import xent_loss
 from metric.similarity_mean import Modified_Positive_Negative_Mean
 import torchmetrics
-import torch.nn.functional as F
-from functools import reduce
-import operator
 import os
-import pickle
-import numpy as np
 import utils
 
 class Modified_Simclr1Model(pl.LightningModule):
@@ -31,6 +26,7 @@ class Modified_Simclr1Model(pl.LightningModule):
 
         self.lr = config.training.lr
         self.max_epochs = config.training.max_epochs
+        self.checkpoint_tosave = config.training.checkpoint_tosave
         
         self.K = config.dataset.K
         self.batch_size = config.dataset.batch_size
@@ -126,7 +122,7 @@ class Modified_Simclr1Model(pl.LightningModule):
         self.total = 0
         
         #save model .. 
-        if(self.current_epoch % 10 == 0):
+        if(self.current_epoch % self.checkpoint_tosave == 0):
             save_path = os.path.join(self.save_path, self.model_name,
                                     "Pretrained_Model",self.dataset,
                                     self.backbone,"pytorch_lightning")

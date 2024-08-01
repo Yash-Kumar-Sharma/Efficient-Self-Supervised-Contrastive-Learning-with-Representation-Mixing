@@ -3,16 +3,7 @@ import pytorch_lightning as pl
 import torch
 import torchvision
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from Loss.loss import xent_loss
-from metric.similarity_mean import Positive_Negative_Mean
-#import config
 import torchmetrics
-import torch.nn.functional as F
-from functools import reduce
-import operator
-import os
-import pickle
-import numpy as np
 import collections
 from copy import deepcopy
 import os
@@ -57,6 +48,8 @@ class MocoModel(pl.LightningModule):
         
         self.lr = config.training.lr
         self.epochs = config.training.max_epochs
+        self.checkpoint_tosave = config.training.checkpoint_tosave
+        
         self.batch_size = config.dataset.batch_size
         self.image_size = config.dataset.image_size
         self.filepath = config.dataset.filepath
@@ -240,7 +233,7 @@ class MocoModel(pl.LightningModule):
         self.total = 0
 
         #save model .. 
-        if(self.current_epoch % 10 == 0):
+        if(self.current_epoch % self.checkpoint_tosave == 0):
             save_path = os.path.join(self.save_path, self.model_name,
                                     "Pretrained_Model",self.dataset,
                                     self.backbone)
