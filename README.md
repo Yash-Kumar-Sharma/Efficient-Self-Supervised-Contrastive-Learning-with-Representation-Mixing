@@ -3,10 +3,10 @@
 
 # Requirements<br />
 
-   Python              - 3.10.12
-   Tensorboard         - 2.13.0
-   Pytorch             - 1.12.0+cu116
-   Pytorch-lightning   - 2.3.3
+   Python              - 3.10.12 <br />
+   Tensorboard         - 2.13.0  <br />
+   Pytorch             - 1.12.0+cu116 <br />
+   Pytorch-lightning   - 2.3.3 <br />
 
 # config settings
 
