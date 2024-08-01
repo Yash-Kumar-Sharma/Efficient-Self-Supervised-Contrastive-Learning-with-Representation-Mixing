@@ -1,7 +1,7 @@
 # Efficient-Self-Supervised-Contrastive-Learning-with-Representation-Mixing
    This is an official implementations of the paper "Efficient Self Supervised Contrastive Learning with Representation Mixing".
 
-# Requirements
+# Requirements<br />
 
    Python              - 3.10.12
    Tensorboard         - 2.13.0
@@ -11,13 +11,14 @@
 # config settings
 
  config
+    
+    config.yaml
+
     backbone
         resnet18.yaml
         resnet20.yaml
         resnet32.yaml
         resnet50.yaml
-
-    config.yaml
 
     dataset
         Cifar100.yaml
@@ -57,7 +58,7 @@
 
    Make changes in respective config file and then run python3 main.py
 
-# (Transfer_Learning)
+ (Transfer_Learning)
 
    Run python3.main post_training=transfer_learning
    Note - Modify post_training/transfer_learning as per the requirements
