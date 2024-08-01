@@ -46,12 +46,9 @@
 ## How to Run
 
 ### (Pretraining & linear_evaluation)
-    <html>
-        <body>
-            <p>python3 main.py dataset.data_dir="path_to_dataset" dataset.save_path="path_to_save_model_on_each_nth_epoch"</p> <br />
-            <p>Note - Default dataset is Cifar10, Default model is Simclr, Default backbone is resnet20 </p><br />
-        </body>
-    </html>
+    
+    <p>python3 main.py dataset.data_dir="path_to_dataset" dataset.save_path="path_to_save_model_on_each_nth_epoch"</p> <br />
+    <p>Note - Default dataset is Cifar10, Default model is Simclr, Default backbone is resnet20 </p><br />
 
 ####or 
 
